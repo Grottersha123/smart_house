@@ -86,7 +86,7 @@ def plotModelResults(model, y_train, y_test, tscv, X_train=None, X_test=None, pl
             plt.plot(anomalies, "o", markersize=10, label="Anomalies")
 
     error = mean_absolute_percentage_error(prediction, y_test)
-    print(error)
+    print("Mean absolute percentage error {} {}".format(round(error, 2), title))
     plt.title("Mean absolute percentage error {} {}".format(round(error, 2), title))
     plt.legend(loc="best")
     plt.tight_layout()
