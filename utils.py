@@ -1,21 +1,13 @@
 import matplotlib.pyplot as plt  # plots
 import numpy as np  # vectors and matrices
 import pandas as pd  # tables and data manipulations
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 
-
-from dateutil.relativedelta import relativedelta # working with dates with style
-from scipy.optimize import minimize              # for function minimization
-
-import statsmodels.formula.api as smf            # statistics and econometrics
 import statsmodels.tsa.api as smt
 import statsmodels.api as sm
-import scipy.stats as scs
-
 
 
 def mean_absolute_percentage_error(y_true, y_pred):
@@ -86,7 +78,7 @@ def plotModelResults(model, y_train, y_test, tscv, X_train=None, X_test=None, pl
             plt.plot(anomalies, "o", markersize=10, label="Anomalies")
 
     error = mean_absolute_percentage_error(prediction, y_test)
-    print(error)
+    # print("Mean absolute percentage error {} {}".format(round(error, 2), title))
     plt.title("Mean absolute percentage error {} {}".format(round(error, 2), title))
     plt.legend(loc="best")
     plt.tight_layout()
@@ -109,7 +101,8 @@ def plotCoefficients(model, X_train):
     plt.hlines(y=0, xmin=0, xmax=len(coefs), linestyles='dashed');
 
 
-def get_predict_all(prepared_data, device_name_dict, tscv, scale=True):
+def get_predict_all(model, prepared_data, device_name_dict, tscv, scale=True, plot=True):
+    lst_models = []
     for data_p in prepared_data:
         data_for_model = data_p
         y_clmn = data_for_model.columns[0]
@@ -125,16 +118,18 @@ def get_predict_all(prepared_data, device_name_dict, tscv, scale=True):
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.transform(X_test)
 
-        # %%
-
         # machine learning in two lines
-        lr = LinearRegression()
-        lr.fit(X_train, y_train)
-
+        model.fit(X_train, y_train)
+        prediction = model.predict(X_test)
+        error = mean_absolute_percentage_error(prediction, y_test)
+        print("Mean absolute percentage error {} {}".format(round(error, 2), y_clmn))
+        lst_models.append({'model': model, 'error': round(error, 2), 'name': y_clmn, 'full_name': name_clm})
         # %%
-
-        plotModelResults(lr, y_train, y_test, tscv, X_train=X_train, X_test=X_test, plot_intervals=True, title=name_clm)
-        plotCoefficients(lr, X_train_interval)
+    if plot:
+        plotModelResults(model, y_train, y_test, tscv, X_train=X_train, X_test=X_test, plot_intervals=True,
+                         title=name_clm)
+        plotCoefficients(model, X_train_interval)
+    return lst_models
 
 
 def tsplot(y, lags=None, figsize=(12, 7), style='bmh'):
