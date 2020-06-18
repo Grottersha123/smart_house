@@ -121,10 +121,10 @@ def get_prediction(data_sensor_filter, models, error=None):
     for data_sensor, model_file in zip(data_sensor_filter, models):
         y_clmn = data_sensor.columns[0]
         y = data_sensor[y_clmn]
-        у_true.append(y)
+        у_true.append(y.value[0])
         X = data_sensor.drop([y_clmn], axis=1)
         predict = model_file['model'].predict(X)
-        data_prediction_sensor.append(predict)
+        data_prediction_sensor.append(predict[0])
         if error:
             pass
     print(у_true)

@@ -17,6 +17,6 @@ data_sensor = dict(
 
 # Block
 
-filter_data, models = prepared_block_lag_data(data_sensor, 'lag_7', TEMPSENS, '2020-04-22',
+filter_data, models = prepared_block_lag_data(data_sensor, 'lag_1', TEMPSENS, '2020-04-22',
                                               models_path=TEMEPSENS_MODELS)
 print(get_prediction(filter_data, models))
