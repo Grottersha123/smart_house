@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt  # plots
 import numpy as np  # vectors and matrices
 import pandas as pd  # tables and data manipulations
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 
-scaler = StandardScaler()
+
 
 import statsmodels.tsa.api as smt
 import statsmodels.api as sm
@@ -16,11 +17,9 @@ def mean_absolute_percentage_error(y_true, y_pred):
 
 def sensor_data_mean(clm, data_pivot_date=[], fillna='', DROP_CLM=[]):
     data_pivot = data_pivot_date.groupby(clm).mean()
-    print(data_pivot.columns)
     data_pivot = data_pivot.drop(DROP_CLM, axis=1)
     data_temp = dict()
     for i in data_pivot.columns:
-        print(i)
         data_temp[i] = pd.Series(data_pivot[i].dropna().to_list())
     if fillna:
         corr_data_frame = pd.DataFrame(data_temp).fillna(method=fillna)
@@ -101,8 +100,11 @@ def plotCoefficients(model, X_train):
     plt.hlines(y=0, xmin=0, xmax=len(coefs), linestyles='dashed');
 
 
-def get_predict_all(model, prepared_data, device_name_dict, tscv, scale=True, plot=True):
+def get_predict_all(prepared_data, device_name_dict, tscv, scale=True, plot=True):
     lst_models = []
+    lr = LinearRegression()
+    scaler = StandardScaler()
+    scaler_1 = StandardScaler()
     for data_p in prepared_data:
         data_for_model = data_p
         y_clmn = data_for_model.columns[0]
@@ -111,24 +113,30 @@ def get_predict_all(model, prepared_data, device_name_dict, tscv, scale=True, pl
         X = data_for_model.drop([y_clmn], axis=1)
         # reserve 30% of data for testing
         X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0.3)
+        print(X_train.columns)
+        colmn = X_test.columns
         X_train_interval = X_train
 
         if scale:
-            print(scale)
+            scaler_1.fit(X_train)
+            scaler_1.transform(X_train)
             X_train = scaler.fit_transform(X_train)
-            X_test = scaler.transform(X_test)
 
+            X_test = scaler.transform(X_test)
         # machine learning in two lines
-        model.fit(X_train, y_train)
-        prediction = model.predict(X_test)
+        lr.fit(X_train, y_train)
+        prediction = lr.predict(X_test)
+
         error = mean_absolute_percentage_error(prediction, y_test)
         print("Mean absolute percentage error {} {}".format(round(error, 2), y_clmn))
-        lst_models.append({'model': model, 'error': round(error, 2), 'name': y_clmn, 'full_name': name_clm})
+        lst_models.append(
+            {'model': lr, 'error': round(error, 2), 'name': y_clmn, 'full_name': name_clm, 'X_test': X_test,
+             'columns': colmn, 'scaler': scaler_1})
         # %%
     if plot:
-        plotModelResults(model, y_train, y_test, tscv, X_train=X_train, X_test=X_test, plot_intervals=True,
+        plotModelResults(lr, y_train, y_test, tscv, X_train=X_train, X_test=X_test, plot_intervals=True,
                          title=name_clm)
-        plotCoefficients(model, X_train_interval)
+        plotCoefficients(lr, X_train_interval)
     return lst_models
 
 
