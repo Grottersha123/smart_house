@@ -8,11 +8,6 @@ from config import device_name_dict, TEMPSENS, TEMEPSENS_MODELS, dropdown_list_d
 
 TEMPERATURE_MODULE = [
     html.Div([
-        html.H2('Smart_home sensors prediction app',
-                style={'float': 'left',
-                       }),
-    ], className='row'),
-    html.Div([
         html.Div([
             dcc.Dropdown(
                 id='demo-dropdown_lag_temp',

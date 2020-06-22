@@ -1,5 +1,5 @@
 import os
-from config import models_dir, ROOT_DIR
+from config import ROOT_DIR
 import pickle as pk
 
 models_dir = os.path.join(ROOT_DIR, r'sense')

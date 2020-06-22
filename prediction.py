@@ -44,7 +44,7 @@ def load_data():
     corr.columns = ['x', 'y', 'value']
     corr['value'] = corr['value'].abs()
     # фильтруем корреляцию
-    CORR_COEFF = 0.7
+    CORR_COEFF = 0.6
     corr = corr[(corr['value'] >= CORR_COEFF) & (corr['value'] != 1.0)]
 
     corr_data_frame = corr.pivot('y', 'x')['value']
@@ -61,19 +61,19 @@ def load_data():
 def load_data_pivot():
     path_pivot = r'D:\Git_project\Jupyter_Projects\Smart_house\sensor_data_vis.csv'
     data_pivot = pd.read_csv(path_pivot, index_col='id_sp')
-
-    corr = data_pivot.corr()
+    path_corr = r'D:\Git_project\Jupyter_Projects\Smart_house\sensor_data_vis_corr.csv'
+    data_corr = pd.read_csv(path_corr)
+    corr = data_corr.corr()
     corr = pd.melt(corr.reset_index(),
                    id_vars='index')  # Unpivot the dataframe, so we can get pair of arrays for x and y
     corr.columns = ['x', 'y', 'value']
     corr['value'] = corr['value'].abs()
     # фильтруем корреляцию
     # Кореляция и вытакскивание признаков
-    CORR_COEFF = 0.70
+    CORR_COEFF = 0.7
     corr = corr[(corr['value'] >= CORR_COEFF) & (corr['value'] != 1.0)]
 
     corr_data_frame = corr.pivot('y', 'x')['value']
-    print(corr_data_frame)
     return data_pivot, corr_data_frame
 
 
