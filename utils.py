@@ -100,7 +100,7 @@ def plotCoefficients(model, X_train):
     plt.hlines(y=0, xmin=0, xmax=len(coefs), linestyles='dashed');
 
 
-def get_predict_all(prepared_data, device_name_dict, tscv, scale=True, plot=True):
+def get_predict_all(prepared_data, device_name_dict, tscv, scale=False, plot=True):
     lst_models = []
     lr = LinearRegression()
     scaler = StandardScaler()

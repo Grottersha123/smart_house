@@ -2,11 +2,12 @@ import logging
 import pickle
 from operator import itemgetter
 
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
 
-from utils import sensor_data_mean
+from utils import sensor_data_mean, mean_absolute_percentage_error
 
 logging.basicConfig(level=logging.DEBUG)
 # logging.basicConfig(filename="sample.log", level=logging.INFO)
@@ -16,9 +17,10 @@ scaler = StandardScaler()
 DROP_CLM = ['SRN1', 'TEMPSENS2', 'TEMPSENS11', 'TEMPSENS12', 'HUMSENS10', 'HUMSENS11', 'MOTSENS10', 'MOTSENS9']
 
 
+# TODO проверить пути
 def load_data():
     main_path = r'D:\Git_project\Jupyter_Projects\Smart_house\data\device_log_join_device_type.csv'
-    data = pd.read_csv(main_path, encoding="cp1251", sep=',', engine='python')
+    data = pd.read_csv(main_path, encoding="cp1251", sep=',')
     logging.info("load main data size - {}".format(data.shape[0]))
     # for time-series cross-validation set 5 folds
 
@@ -32,8 +34,6 @@ def load_data():
     data_pivot = data[clm].pivot('un', 'device_name', 'value')
     data_pivot_date = data_pivot.join(data[['un', 'id', 'id_sp']].set_index('un'))
 
-    # Кореляция и вытакскивание признаков
-    CORR_COEFF = 0.7
     data_corr, data_pivot = sensor_data_mean('id_sp', data_pivot_date=data_pivot_date, fillna='bfill',
                                              DROP_CLM=DROP_CLM)
     logging.info("data regroup")
@@ -44,6 +44,7 @@ def load_data():
     corr.columns = ['x', 'y', 'value']
     corr['value'] = corr['value'].abs()
     # фильтруем корреляцию
+    CORR_COEFF = 0.7
     corr = corr[(corr['value'] >= CORR_COEFF) & (corr['value'] != 1.0)]
 
     corr_data_frame = corr.pivot('y', 'x')['value']
@@ -52,12 +53,34 @@ def load_data():
     for i in data_pivot.columns:
         if 'MOT' in i:
             data_pivot[i] = data_pivot[i].apply(lambda x: 0 if x <= 0 else 1)
-
+    data_pivot.to_csv(r'sensor_data_vis.csv', index=True, )
+    pd.DataFrame(corr_data_frame).to_csv(r'sensor_data_corr_vis.csv', index=True)
     return data_pivot, corr_data_frame, device_name_dict
+
+
+def load_data_pivot():
+    path_pivot = r'D:\Git_project\Jupyter_Projects\Smart_house\sensor_data_vis.csv'
+    data_pivot = pd.read_csv(path_pivot, index_col='id_sp')
+
+    corr = data_pivot.corr()
+    corr = pd.melt(corr.reset_index(),
+                   id_vars='index')  # Unpivot the dataframe, so we can get pair of arrays for x and y
+    corr.columns = ['x', 'y', 'value']
+    corr['value'] = corr['value'].abs()
+    # фильтруем корреляцию
+    # Кореляция и вытакскивание признаков
+    CORR_COEFF = 0.70
+    corr = corr[(corr['value'] >= CORR_COEFF) & (corr['value'] != 1.0)]
+
+    corr_data_frame = corr.pivot('y', 'x')['value']
+    print(corr_data_frame)
+    return data_pivot, corr_data_frame
 
 
 def create_data_for_pred(data, corr_data, weekday=True, pred_d=1, lag=7, another=True, CORR_COEFF=None, time=False):
     data_frames = dict()
+    # print(data.index)
+    # data.set_index('id_sp', inplace=True, drop=True)
     for d in data.columns:
         clm = [d]
         if another and d in corr_data.columns:
@@ -65,6 +88,8 @@ def create_data_for_pred(data, corr_data, weekday=True, pred_d=1, lag=7, another
             data_feature = data[clm]
         else:
             data_feature = data[clm]
+
+        # print(data_feature)
         for l in range(pred_d, lag + 1):
             data_feature['lag_{}'.format(l)] = data_feature[d].shift(l)
         if weekday:
@@ -106,7 +131,9 @@ def prepared_block_lag_data(data_sensor: dict, lag: str, block: list, time: str,
     # фигачится фильтрация по time
     # удаляется колонка time
     data_sensor_lag = data_sensor[lag]
+    print(data_sensor_lag['HUMSENS2'])
     data_sensor_block = itemgetter(*block)(data_sensor_lag)
+    print(data_sensor_block[1].columns)
     data_sensor_filter = [filter_data_frame(data, time) for data in data_sensor_block]
     models = []
     for m in models_path:
@@ -115,17 +142,19 @@ def prepared_block_lag_data(data_sensor: dict, lag: str, block: list, time: str,
     return data_sensor_filter, models
 
 
-def get_prediction(data_sensor_filter, models, error=None):
+def get_prediction(data_sensor_filter, models, error=True):
     data_prediction_sensor = []
     у_true = []
     for data_sensor, model_file in zip(data_sensor_filter, models):
         y_clmn = data_sensor.columns[0]
         y = data_sensor[y_clmn]
-        у_true.append(y.value[0])
+        у_true.append(y.values[0])
         X = data_sensor.drop([y_clmn], axis=1)
+        print(len(X.columns))
+        print(y_clmn)
+        print(X.columns)
         predict = model_file['model'].predict(X)
         data_prediction_sensor.append(predict[0])
-        if error:
-            pass
-    print(у_true)
-    return data_prediction_sensor
+    if error:
+        error_mean = mean_absolute_percentage_error(np.array(у_true), np.array(data_prediction_sensor))
+    return data_prediction_sensor, ['{}%'.format(round(error_mean, 2).tolist())]

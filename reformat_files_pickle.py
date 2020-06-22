@@ -1,8 +1,8 @@
 import os
-from config import models_dir
+from config import models_dir, ROOT_DIR
 import pickle as pk
 
-
+models_dir = os.path.join(ROOT_DIR, r'sense')
 # Для того чтобы законвертировать файлы
 def save_models(lst, filename):
     filename = '{}.sav'.format(filename)
