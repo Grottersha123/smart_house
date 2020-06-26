@@ -5,7 +5,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from config import device_name_dict, dropdown_list_date, dropdown_list_lag, lag, date, \
-    HUMSENS
+    HUMSENS, displayModeBar
 
 HUMIDITY_MODULE = [
     html.Div([
@@ -40,7 +40,7 @@ HUMIDITY_MODULE = [
                 value=0,
                 id=HUMSENS[ind],
                 label=HUMSENS[ind],
-                size=150,
+                size=140,
                 max=80,
                 min=0,
             )
@@ -49,5 +49,14 @@ HUMIDITY_MODULE = [
                 'margin-right': 20
             })
         for ind in range(0, 5)
-    ], className='row')
+    ] + [html.Div(dcc.Graph(
+            id='lag_7_hum',
+            config=dict(
+                displayModeBar=displayModeBar
+            ),
+        figure={
+            'data': [
+                {'x': [1, 2], 'y': [3, 1]}
+            ]
+        }), className='col s12 m2 l8')], className='row')
 ]

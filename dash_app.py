@@ -7,7 +7,8 @@ from dash.dependencies import Input, Output
 from HUMIDITY import HUMIDITY_MODULE
 from TEMPERATURE import TEMPERATURE_MODULE
 from config import device_name_dict, TEMPSENS, TEMEPSENS_MODELS, HUMSENS_MODELS, HUMSENS
-from prediction import create_data_for_pred, load_data_pivot, prepared_block_lag_data, get_prediction
+from prediction import create_data_for_pred, load_data_pivot, prepared_block_lag_data, get_prediction, \
+    create_scatter_plot, get_pred_7
 
 warnings.filterwarnings('ignore')
 
@@ -30,28 +31,35 @@ app.layout = html.Div([html.Div([
 ], className='row')] + TEMPERATURE_MODULE + HUMIDITY_MODULE, className="container")
 
 
-# TEMPERATURE_MODULE +
+# TEMPERATURE_MODULE
 @app.callback(
-    [Output(TEMPSENS[ind - 1], 'value') for ind in range(1, 6)] + [Output('mean_temp_error_temp', 'children')],
+    [Output(TEMPSENS[ind - 1], 'value') for ind in range(1, 6)] + [Output('mean_temp_error_temp', 'children')] + [
+        Output('lag_7_temperature', 'figure')],
     [Input('demo-dropdown_lag_temp', 'value'), Input('demo-dropdown_date_temp', 'value')])
 def callback_predict(value, value_date):
     filter_data, models = prepared_block_lag_data(data_sensor, value, TEMPSENS, value_date,
                                                   models_path=TEMEPSENS_MODELS)
 
     values, error_mean = get_prediction(filter_data, models)
-    result = values + error_mean
+
+    convert_data, covert_mean = get_pred_7(data_sensor, TEMPSENS, value_date, models_path=TEMEPSENS_MODELS)
+    fig = create_scatter_plot(convert_data, covert_mean, TEMPSENS)
+    result = values + error_mean + [fig]
     return result
 
 
 # HUMIDITY_MODULE
 @app.callback(
-    [Output(HUMSENS[ind - 1], 'value') for ind in range(1, 6)] + [Output('mean_temp_error_hum', 'children')],
+    [Output(HUMSENS[ind - 1], 'value') for ind in range(1, 6)] + [Output('mean_temp_error_hum', 'children')] + [
+        Output('lag_7_hum', 'figure')],
     [Input('demo-dropdown_lag_hum', 'value'), Input('demo-dropdown_date_hum', 'value')])
 def callback_predict(value, value_date):
     filter_data, models = prepared_block_lag_data(data_sensor, value, HUMSENS, value_date,
                                                   models_path=HUMSENS_MODELS)
     values, error_mean = get_prediction(filter_data, models)
-    result = values + error_mean
+    convert_data, covert_mean = get_pred_7(data_sensor, HUMSENS, value_date, models_path=HUMSENS_MODELS)
+    fig = create_scatter_plot(convert_data, covert_mean, HUMSENS)
+    result = values + error_mean + [fig]
     return result
 
 

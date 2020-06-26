@@ -4,6 +4,7 @@ from operator import itemgetter
 
 import numpy as np
 import pandas as pd
+import plotly.graph_objs as go
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
 
@@ -89,6 +90,8 @@ def create_data_for_pred(data, corr_data, weekday=True, pred_d=1, lag=7, another
         else:
             data_feature = data[clm]
 
+        if d == 'GAZDTCT1':
+            pass
         # print(data_feature)
         for l in range(pred_d, lag + 1):
             data_feature['lag_{}'.format(l)] = data_feature[d].shift(l)
@@ -131,9 +134,7 @@ def prepared_block_lag_data(data_sensor: dict, lag: str, block: list, time: str,
     # фигачится фильтрация по time
     # удаляется колонка time
     data_sensor_lag = data_sensor[lag]
-    print(data_sensor_lag['HUMSENS2'])
     data_sensor_block = itemgetter(*block)(data_sensor_lag)
-    print(data_sensor_block[1].columns)
     data_sensor_filter = [filter_data_frame(data, time) for data in data_sensor_block]
     models = []
     for m in models_path:
@@ -150,11 +151,41 @@ def get_prediction(data_sensor_filter, models, error=True):
         y = data_sensor[y_clmn]
         у_true.append(y.values[0])
         X = data_sensor.drop([y_clmn], axis=1)
-        print(len(X.columns))
-        print(y_clmn)
-        print(X.columns)
         predict = model_file['model'].predict(X)
-        data_prediction_sensor.append(predict[0])
+        data_prediction_sensor.append(round(predict[0],2))
     if error:
         error_mean = mean_absolute_percentage_error(np.array(у_true), np.array(data_prediction_sensor))
-    return data_prediction_sensor, ['{}%'.format(round(error_mean, 2).tolist())]
+    return data_prediction_sensor, [round(error_mean, 2).tolist()]
+
+
+def get_pred_7(data_sensor, block, time, models_path=None):
+    data_prediction_sensor_7 = []
+    data_prediction_sensor_7_error = []
+    for i in range(1, 8):
+        data_sensor_filter, models = prepared_block_lag_data(data_sensor, 'lag_{}'.format(i), block, time,  models_path=models_path)
+        data_prediction_sensor, error_mean = get_prediction(data_sensor_filter, models)
+        data_prediction_sensor_7.append(data_prediction_sensor)
+        data_prediction_sensor_7_error.append(error_mean)
+    convert_data = list(zip(*data_prediction_sensor_7))
+    covert_mean = list(zip(*data_prediction_sensor_7_error))
+
+    return convert_data, list(covert_mean[0])
+
+
+# TODO добавить по датам отображение
+def create_scatter_plot(convert_data, sensor_mean, block, time=None):
+    traces = [go.Scatter(x=list(range(1, 8)), y=d,
+                         mode='lines+markers',
+                         name=block[ind]) for ind, d in enumerate(convert_data)]
+    average = round(sum(sensor_mean) / len(sensor_mean), 4)
+    fig = {
+        # set data equal to traces
+        'data': traces,
+
+        # use string formatting to include all symbols in the chart title
+        'layout': go.Layout(title='forecast on 7 days <br>mean error {}'.format(average),
+                           autosize=True,
+                            yaxis={'title': 'Time', 'autorange': True})
+    }
+
+    return fig

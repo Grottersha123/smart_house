@@ -4,7 +4,8 @@ import dash_daq as daq
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from config import device_name_dict, TEMPSENS, TEMEPSENS_MODELS, dropdown_list_date, dropdown_list_lag, lag, date
+from config import device_name_dict, TEMPSENS, TEMEPSENS_MODELS, dropdown_list_date, dropdown_list_lag, lag, date, \
+    displayModeBar
 
 TEMPERATURE_MODULE = [
     html.Div([
@@ -45,10 +46,20 @@ TEMPERATURE_MODULE = [
                 style={
                 }
             )
-        ], className='col s12 m4 l1',
+        ], className='col s12 m4 l2',
             style={
                 'margin-right': 20
             })
         for ind in range(0, 5)
-    ], className='row')
+    ] + [html.Div(dcc.Graph(
+            id='lag_7_temperature',
+
+            config=dict(
+                displayModeBar=displayModeBar
+            ),
+        figure={
+            'data': [
+                {'x': [1, 2], 'y': [3, 1]}
+            ]
+        }), className='col s12 m2 l8')], className='row')
 ]

@@ -2,7 +2,7 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 models_dir = os.path.join(ROOT_DIR, r'sensor_models_8_8')
-
+displayModeBar = True
 ###
 # START VALUE
 lag = 'lag_1'
@@ -52,4 +52,4 @@ device_name_dict = {'HUMSENS1': 'HUMSENS1-Влажность в котельно
                     'SRN1': 'SRN1-Сирена при входе'}
 
 dropdown_list_lag = [{'label': '{} day ahead forecast'.format(i), 'value': 'lag_{}'.format(i)} for i in range(1, 8)]
-dropdown_list_date = [{'label': '2020-03-{}'.format(i), 'value': '2020-03-{}'.format(i)} for i in range(1, 8)]
+dropdown_list_date = [{'label': '2020-03-{}'.format(i), 'value': '2020-03-{}'.format(i)} for i in range(1, 28)]
