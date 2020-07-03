@@ -44,19 +44,36 @@ HUMIDITY_MODULE = [
                 max=80,
                 min=0,
             )
-        ], className='col s12 m4 l2',
-            style={
-                'margin-right': 20
-            })
-        for ind in range(0, 5)
-    ] + [html.Div(dcc.Graph(
-            id='lag_7_hum',
-            config=dict(
-                displayModeBar=displayModeBar
-            ),
+        ], className='col s12 m4 l2')
+                 for ind in range(0, 5)
+             ] + [html.Div(dcc.Graph(
+        id='lag_7_hum',
+        config=dict(
+            displayModeBar=displayModeBar
+        ),
         figure={
             'data': [
                 {'x': [1, 2], 'y': [3, 1]}
             ]
-        }), className='col s12 m2 l8')], className='row')
+        }), className='col s12 m2 l8')] + [html.Div([
+
+        dcc.Graph(
+            id='anomalies_hum',
+
+            config=dict(
+                displayModeBar=displayModeBar
+            ),
+            figure={
+                'data': [
+                    {'x': [1, 2], 'y': [3, 1]}
+                ]
+            }),
+        html.Div(dcc.Slider(
+            id='hum-slider',
+            step=None,
+            min=0,
+            max=len(HUMSENS),
+            marks={ind: t for ind, t in enumerate(HUMSENS)},
+            value=0
+        ))], className='col s12 m12 l13')], className='row')
 ]
