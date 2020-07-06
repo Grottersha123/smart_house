@@ -5,10 +5,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from config import device_name_dict, dropdown_list_date, dropdown_list_lag, lag, date, \
-    HUMSENS, displayModeBar
+    HUMSENS, displayModeBar, style_block
 
 HUMIDITY_MODULE = [
     html.Div([
+        html.Div([html.Img(src='assets/temp.svg', className="left-align image-pd"),
+                  html.H5(children='Humidity', className='left-align text_block')]),
         html.Div([
             dcc.Dropdown(
                 id='demo-dropdown_lag_hum',
@@ -31,17 +33,17 @@ HUMIDITY_MODULE = [
                 'color': 'red'
 
             })], className='col s4')
-    ], className='row'),
+    ], className='row', style=style_block),
     html.Div([
-        html.Div([
-            daq.Gauge(
-                showCurrentValue=True,
-                units="%",
-                value=0,
-                id=HUMSENS[ind],
-                label=HUMSENS[ind],
-                size=140,
-                max=80,
+                 html.Div([
+                     daq.Gauge(
+                         showCurrentValue=True,
+                         units="%",
+                         value=0,
+                         id=HUMSENS[ind],
+                         label=HUMSENS[ind],
+                         size=140,
+                         max=80,
                 min=0,
             )
         ], className='col s12 m4 l2')
@@ -72,8 +74,8 @@ HUMIDITY_MODULE = [
             id='hum-slider',
             step=None,
             min=0,
-            max=len(HUMSENS),
+            max=len(HUMSENS) - 1,
             marks={ind: t for ind, t in enumerate(HUMSENS)},
             value=0
-        ))], className='col s12 m12 l13')], className='row')
+        ))], className='col s12 m12 l13')], className='row', style=style_block)
 ]

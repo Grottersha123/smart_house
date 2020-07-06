@@ -1,4 +1,25 @@
 .container {
   width: 80%;
-  max-width:initial;
+  max-width: initial;
+}
+
+@font-face {
+  font-family: Roboto-Regular; /* Имя шрифта */
+  src: url(Roboto-Regular.ttf); /* Путь к файлу со шрифтом */
+}
+
+.text_block {
+  font-family: Roboto-Regular; /* Имя шрифта */
+  font-style: normal;
+  font-weight: normal;
+  font-size: 40px;
+  display: inline-block;
+  /* identical to box height */
+
+
+  color: #B2B2B2;
+}
+
+.image-pd {
+  padding-right: 10px;
 }

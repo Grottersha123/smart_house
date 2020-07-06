@@ -9,6 +9,7 @@ from adtk.data import validate_series
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler
 
+from config import COLORS_SENS, COORS_ANOMAL, COLOR_BG
 from utils import mean_absolute_percentage_error
 
 logging.basicConfig(level=logging.DEBUG)
@@ -129,15 +130,17 @@ def get_pred_7(data_sensor, block, time, models_path=None):
 def create_scatter_plot(convert_data, sensor_mean, block, time=None):
     traces = [go.Scatter(x=list(range(1, 8)), y=d,
                          mode='lines+markers',
-                         name=block[ind]) for ind, d in enumerate(convert_data)]
+                         name=block[ind],
+                         marker_color=COLORS_SENS[ind]) for ind, d in enumerate(convert_data)]
     average = round(sum(sensor_mean) / len(sensor_mean), 4)
     fig = {
         # set data equal to traces
         'data': traces,
-
         # use string formatting to include all symbols in the chart title
         'layout': go.Layout(title='forecast on 7 days <br>mean error {}'.format(average),
                             autosize=True,
+                            plot_bgcolor="#F7F7F7",
+                            paper_bgcolor='#F7F7F7',
                             yaxis={'title': 'Time', 'autorange': True})
     }
 
@@ -165,20 +168,21 @@ def create_plot(anomal_data):
         data_d = anomal_data[d]
         traces = [go.Scatter(x=data_d['data'].index, y=data_d['data'].values,
                              mode='lines',
-                             marker_color='blue',
+                             marker_color=COORS_ANOMAL[0],
                              name=d),
                   go.Scatter(x=data_d['anom'].index,
                              y=data_d['anom'].values,
-                             marker_color='red',
+                             marker_color=COORS_ANOMAL[1],
                              mode='markers',
                              name='value anomaly')]
         fig = {
             # set data equal to traces
             'data': traces,
-
             # use string formatting to include all symbols in the chart title
             'layout': go.Layout(title='{} anomaly'.format(d),
                                 autosize=True,
+                                plot_bgcolor=COLOR_BG,
+                                paper_bgcolor=COLOR_BG,
                                 yaxis={'autorange': True},
                                 xaxis={'title': 'Time'})
         }

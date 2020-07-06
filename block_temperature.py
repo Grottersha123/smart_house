@@ -1,14 +1,14 @@
-import dash
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
-from dash.dependencies import Input, Output
 
-from config import device_name_dict, TEMPSENS, TEMEPSENS_MODELS, dropdown_list_date, dropdown_list_lag, lag, date, \
-    displayModeBar
+from config import TEMPSENS, dropdown_list_date, dropdown_list_lag, lag, date, \
+    displayModeBar, style_block
 
 TEMPERATURE_MODULE = [
     html.Div([
+        html.Div([html.Img(src='assets/temp.svg', className="left-align image-pd"),
+                  html.H5(children='Temperture', className='left-align text_block')]),
         html.Div([
             dcc.Dropdown(
                 id='demo-dropdown_lag_temp',
@@ -31,7 +31,7 @@ TEMPERATURE_MODULE = [
                 'color': 'red'
 
             })], className='col s4')
-    ], className='row'),
+    ], className='row', style=style_block),
     html.Div([
                  html.Div([
                      daq.Thermometer(
@@ -78,8 +78,8 @@ TEMPERATURE_MODULE = [
             id='temp-slider',
             step=None,
             min=0,
-            max=len(TEMPSENS),
+            max=len(TEMPSENS) - 1,
             marks={ind: t for ind, t in enumerate(TEMPSENS)},
             value=0
-        ))], className='col s12 m12 l13')], className='row')
+        ))], className='col s12 m12 l13')], className='row', style=style_block)
 ]

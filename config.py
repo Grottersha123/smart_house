@@ -8,7 +8,19 @@ displayModeBar = True
 lag = 'lag_1'
 date = '2019-03-1'
 ###
+COLORS_SENS = ['#3883A3', '#FFB15A',
+               '#37A463',
+               '#57B9E4',
+               '#6577E8']
 
+style_block = {'background': '#F7F7F7',
+               'box-shadow': '5px 8px 15px rgba(0, 0, 0, 0.25)',
+               'padding': '10px 10px 10px 10px',
+               'border-radius': '20px'}
+
+COLOR_BG = '#F7F7F7'
+
+COORS_ANOMAL = ['#69B3F8', '#F0A432']
 # block_1 TempSENS
 TEMPSENS = ['TEMPSENS1',
             'TEMPSENS3',

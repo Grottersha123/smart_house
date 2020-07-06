@@ -16,7 +16,7 @@ from prediction import create_data_for_pred, prepared_block_lag_data, get_predic
 
 warnings.filterwarnings('ignore')
 
-app = dash.Dash('smart_house', external_stylesheets=[
+app = dash.Dash(__name__, external_stylesheets=[
     'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css'
 ], external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js'])
 

@@ -3,7 +3,7 @@ import dash_daq as daq
 import dash_html_components as html
 
 from config import SENSCOM, dropdown_list_date, dropdown_list_lag, lag, date, \
-    displayModeBar
+    displayModeBar, COLORS_SENS, style_block
 
 #         html.Div([
 #             html.Span('mean absolute error - '),
@@ -13,6 +13,8 @@ from config import SENSCOM, dropdown_list_date, dropdown_list_lag, lag, date, \
 #             })], className='col s4')
 SENSCOM_MODULE = [
     html.Div([
+        html.Div([html.Img(src='assets/temp.svg', className="left-align image-pd"),
+                  html.H5(children='Common sensors', className='left-align text_block')]),
         html.Div([
             dcc.Dropdown(
                 id='demo-dropdown_lag_sens',
@@ -29,12 +31,13 @@ SENSCOM_MODULE = [
                 clearable=False
             ),
         ], className='col s4 m2 l2'),
-    ], className='row'),
+    ], className='row', style=style_block),
     html.Div([
                  html.Div([
                      daq.Gauge(
                          color={"gradient": True,
-                                "ranges": {"green": [250, 350], "yellow": [350, 450], "red": [450, 610]}},
+                                "ranges": {COLORS_SENS[0]: [250, 350], COLORS_SENS[1]: [350, 450],
+                                           COLORS_SENS[2]: [450, 610]}},
                          showCurrentValue=True,
                          units="%",
                          value=0,
@@ -57,7 +60,8 @@ SENSCOM_MODULE = [
                  html.Div([
                      daq.Gauge(
                          color={"gradient": True,
-                                "ranges": {"green": [700, 730], "yellow": [730, 760], "red": [760, 800]}},
+                                "ranges": {COLORS_SENS[0]: [700, 730], COLORS_SENS[1]: [730, 760],
+                                           COLORS_SENS[2]: [760, 800]}},
                          showCurrentValue=True,
                          units="%",
                          value=0,
@@ -105,11 +109,11 @@ SENSCOM_MODULE = [
             id='sens-slider',
             step=None,
             min=0,
-            max=2,
+            max=len(SENSCOM) - 1,
             marks={
                 0: SENSCOM[0],
                 2: SENSCOM[2]
             },
             value=0
-        ))], className='col s12 m12 l13')], className='row')
+        ))], className='col s12 m12 l13')], className='row', style=style_block)
 ]
